@@ -16,7 +16,12 @@ rm -rf usr/lib
 ln -s $PWD/usr/lib64 $PWD/usr/lib
 
 if [ -d "lib" ]; then
-    mv lib/* lib64/
+    # Only move libs if they don't already exists to avoid errors.
+    for lib_file in lib/*; do
+        if [ ! -f lib64/$(basename -- "${lib_file}") ]; then
+            mv ${lib_file} lib64/
+        fi
+    done
     rm -rf lib
 fi
 
