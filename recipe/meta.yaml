@@ -1,11 +1,11 @@
 {% set version = "2.17" %}
-{% set kernel_headers_version = "3.10.0" %}  # [cross_target_platform != "linux-aarch64"]
-{% set kernel_headers_version = "4.18.0" %}  # [cross_target_platform == "linux-aarch64"]
-{% set build_number = "10" %}
-{% set rpm_url = "http://vault.centos.org/centos/7.8.2003/os/x86_64/Packages" %}  # [cross_target_platform == "linux-64"]
-{% set rpm_url = "http://vault.centos.org/altarch/7.8.2003/os/aarch64/Packages" %}       # [cross_target_platform == "linux-aarch64"]
-{% set rpm_url = "http://vault.centos.org/altarch/7.8.2003/os/ppc64le/Packages" %}       # [cross_target_platform == "linux-ppc64le"]
-{% set rpm_url = "http://download.sinenomine.net/clefos/7/os/s390x" %}             # [cross_target_platform == "linux-s390x"]
+{% set kernel_headers_version = "5.14.0" %}  # [cross_target_platform != "linux-aarch64"]
+{% set kernel_headers_version = "5.14.0" %}  # [cross_target_platform == "linux-aarch64"]
+{% set build_number = "11" %}
+{% set rpm_url = "http://vault.centos.org/centos/7.8.2003/os/x86_64/Packages" %}    # [cross_target_platform == "linux-64"]
+{% set rpm_url = "http://vault.centos.org/altarch/7.8.2003/os/aarch64/Packages" %}  # [cross_target_platform == "linux-aarch64"]
+{% set rpm_url = "http://vault.centos.org/altarch/7.8.2003/os/ppc64le/Packages" %}  # [cross_target_platform == "linux-ppc64le"]
+{% set rpm_url = "http://download.sinenomine.net/clefos/7/os/s390x" %}              # [cross_target_platform == "linux-s390x"]
 
 package:
   name: linux-sysroot
@@ -45,11 +45,8 @@ source:
     sha256: 034e49d09f864c3afcf007a991da5c89ee2106ebeb3bdcf8aca61fc4f5ad916d  # [cross_target_platform == "linux-s390x"]
 
   - folder: binary-kernel-headers
-    url: {{ rpm_url }}/kernel-headers-{{ kernel_headers_version }}-1127.el7.{{ centos_machine }}.rpm     # [cross_target_platform == "linux-64"]
-    url: {{ rpm_url }}/kernel-headers-{{ kernel_headers_version }}-147.8.1.el7.{{ centos_machine }}.rpm  # [cross_target_platform == "linux-aarch64"]
-    url: {{ rpm_url }}/kernel-headers-{{ kernel_headers_version }}-1127.el7.{{ centos_machine }}.rpm     # [cross_target_platform == "linux-ppc64le"]
-    url: {{ rpm_url }}/kernel-headers-{{ kernel_headers_version }}-1127.el7.{{ centos_machine }}.rpm     # [cross_target_platform == "linux-s390x"]
-    sha256: a78a986498e77a803d33823db7d77edcde1d0431f8d19e089649404ddcf62c9f  # [cross_target_platform == "linux-64"]
+    url: https://www.rpmfind.net/linux/centos-stream/9-stream/AppStream/x86_64/os/Packages/kernel-headers-{{ kernel_headers_version }}-516.el9.{{ centos_machine }}.rpm
+    sha256: 6e5035dbbf6f229fec5058f944ca47171f0d44944d99220c3543b83071269a3c  # [cross_target_platform == "linux-64"]
     sha256: 9e9ea85efa4c1e20c1978fca84bb7f8ba17e7ad610717af2929c4d71ff384060  # [cross_target_platform == "linux-aarch64"]
     sha256: df6867bcc614bf7f6561a983db25b2028fadb57d13ec781b5be9fab0de7354db  # [cross_target_platform == "linux-ppc64le"]
     sha256: b4bd26bbccab8028d903d250a7e599f77c7c5ea8b7137f96aecf998016799d93  # [cross_target_platform == "linux-s390x"]
