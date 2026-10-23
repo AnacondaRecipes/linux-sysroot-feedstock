@@ -1,7 +1,7 @@
 {% set rocky_version = "8.9" %}
 {% set glibc_version = "2.28" %}
 {% set kernel_headers_version = "4.18.0" %}
-{% set build_number = "1" %}
+{% set build_number = "2" %}
 
 {% set rpm_url = "https://download.rockylinux.org/vault/rocky/" ~ rocky_version ~ "/BaseOS/" ~ centos_machine ~ "/os/Packages" %}
 {% set appstream_rpm_url = "https://download.rockylinux.org/vault/rocky/" ~ rocky_version ~ "/AppStream/" ~ centos_machine ~ "/os/Packages" %}
@@ -56,6 +56,28 @@ source:
     sha256: 342d3ce38ce5fc9efca741a556d7f87d15c202730af80777e2c9a611001636c3  # [cross_target_platform == "linux-aarch64"]
   # END source
 
+  # The kernel-headers RPM ships no license file; texts from Linux v4.18 (COPYING and LICENSES/)
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/COPYING?h=v4.18
+    fn: COPYING
+    sha256: ee5808b032a67f587d3541099d46de34f5bec8cd5976114ba07f1299ee6001ff
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/GPL-2.0?h=v4.18
+    fn: GPL-2.0
+    sha256: f6b78c087c3ebdf0f3c13415070dd480a3f35d8fc76f3d02180a407c1c812f79
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/exceptions/Linux-syscall-note?h=v4.18
+    fn: Linux-syscall-note
+    sha256: 8e378ab93586eb55135d3bc119cce787f7324f48394777d00c34fa3d0be3303f
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/BSD-3-Clause?h=v4.18
+    fn: BSD-3-Clause
+    sha256: 7a83b1aeb460458db9a4bd521d7f237c45b1650f6e60ea5ffc71e49472454de3
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/MIT?h=v4.18
+    fn: MIT
+    sha256: 323c587d0ccf10e376f8bf9a7f31fb4ca6078105194b42e0b1e0ee2bc9bde71f
+
 build:
   number: {{ build_number }}
   noarch: generic
@@ -76,6 +98,24 @@ outputs:
     test:
       commands:
         test -f $PREFIX/{{ target_machine }}-{{ ctng_vendor }}-linux-gnu/sysroot/usr/include/linux/version.h
+    about:
+      home: https://download.rockylinux.org/vault/rocky/{{ rocky_version }}
+      # uapi headers are GPL-2.0 WITH Linux-syscall-note (COPYING); GPL-2.0+/GPL-1.0+/LGPL-2.x WITH Linux-syscall-note
+      # headers are covered by their GPL-2.0 option; a few headers are GPL-2.0 only, BSD-3-Clause or MIT (drm)
+      license: GPL-2.0-only WITH Linux-syscall-note AND GPL-2.0-only AND BSD-3-Clause AND MIT
+      license_family: Other
+      license_file:
+        - kernel-licenses/COPYING
+        - kernel-licenses/GPL-2.0
+        - kernel-licenses/Linux-syscall-note
+        - kernel-licenses/BSD-3-Clause
+        - kernel-licenses/MIT
+      summary: "(CDT) Header files for the Linux kernel for use by glibc"
+      description: |
+        Kernel-headers includes the C header files that specify the interface between
+        the Linux kernel and userspace libraries and programs.  The header files
+        define structures and constants that are needed for building most standard
+        programs and are also needed for rebuilding the glibc package.
 
   - name: sysroot_{{ cross_target_platform }}
     script: build-sysroot.sh
@@ -111,10 +151,14 @@ outputs:
 
 about:
   home: https://download.rockylinux.org/vault/rocky/{{ rocky_version }}
-  license: LGPL-2.0-or-later AND LGPL-2.0-or-later WITH exceptions AND GPL-2.0-or-later
-  license_family: GPL
-  license_file: LICENSE
-  # license files are packaged with source
+  # glibc: libraries LGPL-2.1+ (crt*.o with the GCC exception, libio with the GNU compiler exception),
+  # programs GPL-2.0+, other components as listed in its LICENSES file (applies to sysroot_*)
+  license: LGPL-2.1-or-later AND LGPL-2.1-or-later WITH GCC-exception-2.0 AND LGPL-2.1-or-later WITH GNU-compiler-exception AND GPL-2.0-or-later AND BSD-3-Clause AND HPND AND ISC AND Inner-Net-2.0 AND SunPro
+  license_family: Other
+  license_file:
+    - binary-glibc/usr/share/licenses/glibc/COPYING
+    - binary-glibc/usr/share/licenses/glibc/COPYING.LIB
+    - binary-glibc/usr/share/licenses/glibc/LICENSES
   summary: "(CDT) The GNU libc libraries and header files for the Linux kernel for use by glibc"
   description: |
         The glibc package contains standard libraries which are used by multiple
@@ -133,7 +177,6 @@ extra:
   skip-lints:
     - missing_dev_url
     - missing_documentation
-    - incorrect_license
     - host_section_needs_exact_pinnings
   recipe-maintainers:
     - isuruf
