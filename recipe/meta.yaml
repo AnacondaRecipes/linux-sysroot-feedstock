@@ -88,7 +88,7 @@ source:
 
   # Notices the glibc RPM does not ship: Unicode data terms (locale data) and the two exception texts
   - folder: glibc-licenses
-    url: https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=localedata/unicode-gen/unicode-license.txt;hb=glibc-2.28
+    url: https://raw.githubusercontent.com/bminor/glibc/glibc-2.28/localedata/unicode-gen/unicode-license.txt
     fn: unicode-license.txt
     sha256: 72a95a3930bf6fc1961c08c3011321d294c5d9ee9c5d10b535c1afca15287fba
   - folder: glibc-licenses
