@@ -77,6 +77,26 @@ source:
     url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/MIT?h=v4.18
     fn: MIT
     sha256: 323c587d0ccf10e376f8bf9a7f31fb4ca6078105194b42e0b1e0ee2bc9bde71f
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/LGPL-2.0?h=v4.18
+    fn: LGPL-2.0
+    sha256: b62fa9feac8de9899cd1738f5845cedbad9ca2acd8056513b77666c9ba1ef600
+  - folder: kernel-licenses
+    url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/LGPL-2.1?h=v4.18
+    fn: LGPL-2.1
+    sha256: 0b9a4febcdee6de55872501d5c1a8f5d8b0d1650cd4d5351995ceb22e889f8ca
+
+  # Notices the glibc RPM does not ship: Unicode data terms (locale data) and the two exception texts
+  - folder: glibc-licenses
+    url: https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=localedata/unicode-gen/unicode-license.txt;hb=glibc-2.28
+    fn: unicode-license.txt
+    sha256: 72a95a3930bf6fc1961c08c3011321d294c5d9ee9c5d10b535c1afca15287fba
+  - folder: glibc-licenses
+    url: https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/GCC-exception-2.0-note.txt
+    sha256: 71acf2b6078c4d36950ac55f4ba7d4b5506b5c8746c51feff90d5682d5871495
+  - folder: glibc-licenses
+    url: https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/GNU-compiler-exception.txt
+    sha256: 8cc0807167ca1a95e384c9a9a9b44f941a3a4a84496e1c1db5263dabac5a5a6e
 
 build:
   number: {{ build_number }}
@@ -100,9 +120,9 @@ outputs:
         test -f $PREFIX/{{ target_machine }}-{{ ctng_vendor }}-linux-gnu/sysroot/usr/include/linux/version.h
     about:
       home: https://download.rockylinux.org/vault/rocky/{{ rocky_version }}
-      # uapi headers are GPL-2.0 WITH Linux-syscall-note (COPYING); GPL-2.0+/GPL-1.0+/LGPL-2.x WITH Linux-syscall-note
-      # headers are covered by their GPL-2.0 option; a few headers are GPL-2.0 only, BSD-3-Clause or MIT (drm)
-      license: GPL-2.0-only WITH Linux-syscall-note AND GPL-2.0-only AND BSD-3-Clause AND MIT
+      # uapi headers are GPL-2.0 WITH Linux-syscall-note (COPYING); GPL-2.0+/GPL-1.0+ headers are distributed under
+      # their GPL-2.0 option; some headers are LGPL-2.x WITH Linux-syscall-note, GPL-2.0 only, BSD-3-Clause or MIT (drm)
+      license: GPL-2.0-only WITH Linux-syscall-note AND GPL-2.0-only AND LGPL-2.0-or-later WITH Linux-syscall-note AND LGPL-2.1-only WITH Linux-syscall-note AND LGPL-2.1-or-later WITH Linux-syscall-note AND BSD-3-Clause AND MIT
       license_family: Other
       license_file:
         - kernel-licenses/COPYING
@@ -110,6 +130,8 @@ outputs:
         - kernel-licenses/Linux-syscall-note
         - kernel-licenses/BSD-3-Clause
         - kernel-licenses/MIT
+        - kernel-licenses/LGPL-2.0
+        - kernel-licenses/LGPL-2.1
       summary: "(CDT) Header files for the Linux kernel for use by glibc"
       description: |
         Kernel-headers includes the C header files that specify the interface between
@@ -152,13 +174,16 @@ outputs:
 about:
   home: https://download.rockylinux.org/vault/rocky/{{ rocky_version }}
   # glibc: libraries LGPL-2.1+ (crt*.o with the GCC exception, libio with the GNU compiler exception),
-  # programs GPL-2.0+, other components as listed in its LICENSES file (applies to sysroot_*)
-  license: LGPL-2.1-or-later AND LGPL-2.1-or-later WITH GCC-exception-2.0 AND LGPL-2.1-or-later WITH GNU-compiler-exception AND GPL-2.0-or-later AND BSD-3-Clause AND HPND AND ISC AND Inner-Net-2.0 AND SunPro
+  # programs GPL-2.0+, shipped components listed in its LICENSES file, Unicode data in the locales (sysroot_*)
+  license: LGPL-2.1-or-later AND LGPL-2.1-or-later WITH GCC-exception-2.0-note AND LGPL-2.1-or-later WITH GNU-compiler-exception AND GPL-2.0-or-later AND BSD-3-Clause AND HPND AND ISC AND Inner-Net-2.0 AND SunPro AND Unicode-DFS-2015
   license_family: Other
   license_file:
     - binary-glibc/usr/share/licenses/glibc/COPYING
     - binary-glibc/usr/share/licenses/glibc/COPYING.LIB
     - binary-glibc/usr/share/licenses/glibc/LICENSES
+    - glibc-licenses/unicode-license.txt
+    - glibc-licenses/GCC-exception-2.0-note.txt
+    - glibc-licenses/GNU-compiler-exception.txt
   summary: "(CDT) The GNU libc libraries and header files for the Linux kernel for use by glibc"
   description: |
         The glibc package contains standard libraries which are used by multiple
@@ -175,8 +200,10 @@ about:
 
 extra:
   skip-lints:
+    # repackaged Rocky Linux RPMs: no upstream dev/doc URL beyond the vault in home
     - missing_dev_url
     - missing_documentation
+    # host holds only tzdata and the __glibc virtual package
     - host_section_needs_exact_pinnings
   recipe-maintainers:
     - isuruf
